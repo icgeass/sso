@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <!--默认单点登录配置-->
+    <bean class="com.zeroq6.sso.web.client.domain.SsoConfigResponseDomain">
+        <property name="serverVersion" value="${sso.serverVersion}"/>
+        <property name="aesKey" value="${sso.aesKey}"/>
+        <property name="aesBit" value="${sso.aesBit}"/>
+        <property name="charset" value="${sso.charset}"/>
+        <property name="cookieName" value="${sso.cookieName}"/>
+        <property name="expiredInSeconds" value="${sso.expiredInSeconds}"/>
+        <property name="ignoreUriSuffix" value="${sso.ignoreUriSuffix}"/>
+        <property name="ignoreUriPrefix" value="${sso.ignoreUriPrefix}"/>
+        <property name="disallowUriPrefix" value="${sso.disallowUriPrefix}"/>
+        <property name="disallowUriSuffix" value="${sso.disallowUriSuffix}"/>
+        <property name="returnUrlName" value="${sso.returnUrlName}"/>
+        <property name="singleSignExit" value="${sso.singleSignExit}"/>
+        <property name="ticketName" value="${sso.ticketName}"/>
+        <property name="loginUrl" value="${sso.loginUrl}"/>
+        <property name="logoutUrl" value="${sso.logoutUrl}"/>
+        <property name="defaultRedirectUrl" value="${sso.defaultRedirectUrl}"/>
+        <property name="primaryDomain" value="${sso.primaryDomain}"/>
+        <property name="redirectTicketExpireInSeconds" value="${sso.redirectTicketExpireInSeconds}"/>
+    </bean>
+
+
+    <!--rsa加密-->
+    <!--
+    openssl genrsa -out rsa_private_key.pem 2048 ===> 私钥PKCS#1
+    openssl pkcs8 -topk8 -in rsa_private_key.pem -out pkcs8_rsa_private_key.pem -nocrypt  ===> 将PKCS#1编码的私钥转换为PKCS#8方式
+    openssl rsa -in rsa_private_key.pem -out rsa_public_key.pem -pubout  ===>  从私钥中导出公钥
+    -->
+    <bean id="rsaCrypt" class="com.zeroq6.common.security.RsaCrypt">
+        <!--私钥编码方式，必须在加载私钥之前设置-->
+        <property name="privateKeyEncoding" value="PKCS#8"/>
+        <!--加解密字符串时使用的编码-->
+        <property name="plainTextEncoding" value="utf-8" />
+        <!--解密时密文时，在加密该密文时使用的填充方式，支持RSA/ECB/NoPadding，RSA/ECB/PKCS1Padding-->
+        <property name="cipherDecryptPaddingMode" value="RSA/ECB/PKCS1Padding"/>
+        <!--加密明文时，所要使用的填充方式-->
+        <property name="cipherEncryptPaddingMode" value="RSA/ECB/NoPadding"/>
+        <property name="privateKeyPath" value="${private.key.path}"/>
+        <property name="publicKeyPath" value="${public.key.path}" />
+    </bean>
+
+
+    <!--用户名密码-->
+    <bean id="authenticationService" class="com.zeroq6.sso.service.api.impl.AuthenticationService">
+        <property name="accountInfoMap">
+            <map>
+                <entry key="admin" value="32fe2749dd55b380e127ac2663b4b8c4"/>
+            </map>
+        </property>
+    </bean>
+</beans>

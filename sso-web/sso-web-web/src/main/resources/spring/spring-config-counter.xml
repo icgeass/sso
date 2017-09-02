@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"
+       default-autowire="byName">
+
+
+    <bean id="counterService" class="com.zeroq6.common.counter.CounterService">
+        <property name="cacheServiceApi" ref="cacheServiceApi"/>
+        <property name="counterConfigMap" ref="counterConfigMap"/>
+     </bean>
+    
+    <bean id="counterConfigMap" class="com.zeroq6.common.counter.CounterConfigMap">
+        <constructor-arg>
+            <list>
+                <ref bean="usernameCounterConfig" />
+                <ref bean="ipCounterConfig" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!--抽象通用配置-->
+    <bean id="AbstractCounterConfig" abstract="true" class="com.zeroq6.common.counter.AbstractCounterConfig">
+        <property name="priority" value="0"/>
+        <property name="datePatternString" value="yyyy-MM-dd HH:mm:ss"/>
+        <property name="cacheKeyPrefix" value="COUNTER_"/>
+        <property name="cacheSeconds" value="2592000"/> <!--60*60*24*30-->
+        <property name="lockSeconds" value="86400"/> <!--60*60*24-->
+        <property name="maxTimes" value="5"/>
+
+    </bean>
+
+
+    <!--每个计数器对应的配置-->
+    <!--ip 计数器-->
+    <bean id="ipCounterConfig" class="com.zeroq6.common.counter.CounterConfig" parent="AbstractCounterConfig">
+        <property name="priority" value="1"/>
+        <property name="lockSeconds" value="86400"/> <!--60*60*24-->
+        <property name="maxTimes" value="20"/>
+        <!--以下必填-->
+        <!--counter类型key，区分不同counter-->
+        <property name="type" value="${counter.type.login.ip}"/>
+        <!--传入key 剩余时间-->
+        <property name="msgLock" value="Ip：{0}被锁定，将在{1}后解锁"/>
+        <!--传入key 剩余次数-->
+        <property name="msgTryFailed" value="Ip：{0}剩余重试次数{1}"/>
+    </bean>
+
+
+    <!--username 计数器-->
+    <bean id="usernameCounterConfig" class="com.zeroq6.common.counter.CounterConfig" parent="AbstractCounterConfig">
+        <property name="priority" value="0"/>
+        <property name="lockSeconds" value="21600"/> <!--60*60*6-->
+        <property name="maxTimes" value="5"/>
+        <!--以下必填-->
+        <!--counter类型key，区分不同counter-->
+        <property name="type" value="${counter.type.login.username}"/>
+        <!--传入key 剩余时间-->
+        <property name="msgLock" value="用户{0}被锁定，将在{1}后解锁"/>
+        <!--传入key 剩余次数-->
+        <property name="msgTryFailed" value="用户名或密码错误，剩余重试次数{1}"/>
+    </bean>
+
+</beans>
