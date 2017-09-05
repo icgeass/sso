@@ -72,7 +72,7 @@
 			                        	<label class="sr-only" for="form-password">Password</label>
 			                        	<input type="password" id="password" name="password" placeholder="Password..." class="form-password form-control" id="password">
 			                        </div>
-			                        <button type="button" class="btn" onclick="doLogin()">Sign in!</button>
+			                        <button type="button" id="submit" class="btn">Sign in!</button>
 			                    </form>
 		                    </div>
                         </div>

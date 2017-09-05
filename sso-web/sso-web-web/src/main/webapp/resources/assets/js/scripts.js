@@ -38,12 +38,17 @@ jQuery(document).ready(function() {
 		}
 	});
 
+	$('#submit').on('click', function (e) {
+		doLogin();
+    })
+
 });
 
 function showMsg(msg){
     var html = "<div id='message'>" + msg + "</div>";
-    if($('#message').val() != null){
-        $('#message').remove();
+    var messageDiv = $('#message');
+    if(messageDiv.val() != null){
+        messageDiv.remove();
 	}
 	if($.trim(msg) != ''){
     	$('.login-form').find('input[type="password"]').after(html);
@@ -51,9 +56,19 @@ function showMsg(msg){
 
 }
 
+function enableButton(button, enable) {
+	if(enable === true){
+        button.attr('disabled', false);
+        button.html('Sign in!');
+	}else{
+        button.attr('disabled', true);
+        button.html('Now login...');
+	}
+}
+
 function doLogin(){
+	var submit = $('#submit');
 	var jsencrypt = null;
-	var password = null;
 	var passwordMaxLength = 16;
 	var username = $.trim($("#username").val());
 	var password = $.trim($("#password").val());
@@ -62,18 +77,19 @@ function doLogin(){
 		return;
 	}
 	if(password.length > passwordMaxLength){
-		alert("密码长度不能超过" + passwordMaxLength + "个字符")
+		alert("密码长度不能超过" + passwordMaxLength + "个字符");
 		return;
 	}
 	var now = new Date();
 	jsencrypt = new JSEncrypt();
-	jsencrypt.setPublicKey($("#pubKey").val())
+	jsencrypt.setPublicKey($("#pubKey").val());
 	password = jsencrypt.encrypt((now.valueOf() - (now.getTimezoneOffset() * 60 * 1000)) +  "," + password);
 	if("false" == password){
 		alert("加密失败")
 		return;
 	}
 	// ajax 提交方式
+    enableButton(submit, false);
     $.post("",
         {
             username: username,
@@ -87,7 +103,11 @@ function doLogin(){
             } else {
                 showMsg(resp.message);
             }
-        });
+        }).fail(function () {
+        showMsg('系统繁忙, 请稍后再试!')
+    }).always(function () {
+        enableButton(submit, true);
+    });
 	// window.btoa(password)
 	// 表单提交方式
 	//$("#password").val(password);
