@@ -130,11 +130,12 @@ public class SsoServiceImpl implements SsoServiceApi {
                 if (expire >= cookieMinExpiredInSeconds && expire <= cookieMaxExpiredInSeconds) {
                     re.setExpiredInSeconds(expire);
                 }
-                re.setLoginUrl(re.getLoginUrl().replaceFirst(ssoServiceLoginControllerPrefix, ssoServiceLoginControllerPrefix + ssoConfigRequestDomain.getGroupId() + "/"));
-                re.setLogoutUrl(re.getLogoutUrl().replaceFirst(ssoServiceLoginControllerPrefix, ssoServiceLoginControllerPrefix + ssoConfigRequestDomain.getGroupId() + "/"));
-                re.setCookieName(ssoConfigRequestDomain.getGroupId() + "." + re.getCookieName());
-                // 将groupId对应的配置存入缓存，groupId为SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID，则在初始化时放入
-                ssoConfigServiceImpl.set(groupId, re);
+                // 这几个属性只能设置一次, 否则重叠
+                if(!re.getCookieName().contains(ssoConfigRequestDomain.getGroupId() + ".")){
+                    re.setLoginUrl(re.getLoginUrl().replaceFirst(ssoServiceLoginControllerPrefix, ssoServiceLoginControllerPrefix + ssoConfigRequestDomain.getGroupId() + "/"));
+                    re.setLogoutUrl(re.getLogoutUrl().replaceFirst(ssoServiceLoginControllerPrefix, ssoServiceLoginControllerPrefix + ssoConfigRequestDomain.getGroupId() + "/"));
+                    re.setCookieName(ssoConfigRequestDomain.getGroupId() + "." + re.getCookieName());
+                }
             }
             // 拦截路径是否设置groupId均可配置，默认groupId过期时间不能在客户端配置，否则如果是单点登录域的主域，可能影响其他接入应用
             String disallowUriPrefix = ssoConfigRequestDomain.getDisallowUriPrefix();
@@ -153,6 +154,8 @@ public class SsoServiceImpl implements SsoServiceApi {
             if (StringUtils.isNotBlank(ignoreUriSuffix)) {
                 re.setIgnoreUriSuffix(ignoreUriSuffix);
             }
+            // 将groupId对应的配置存入缓存，groupId为SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID，则在初始化时放入
+            ssoConfigServiceImpl.set(groupId, re);
             return new BaseResponse<SsoConfigResponseDomain>(true, "成功", re);
         } catch (Exception e) {
             logger.error("获取服务端配置异常, ssoConfigRequestDomain: " + JSON.toJSONString(ssoConfigRequestDomain), e);
