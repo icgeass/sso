@@ -85,16 +85,19 @@ public class RedisCacheService implements CacheServiceApi, InitializingBean {
             final Jedis jedis = jedisPool.getResource();
             final Thread targetThread = Thread.currentThread();
             jedisThreadLocal.set(jedis);
+            // 这种方式如果获取资源的链接不关闭，比如说线程池，那边始终无法归还资源
             new Thread() {
                 @Override
                 public void run() {
                     try {
+                        logger.info("监听归还redis链接, " + targetThread.getName());
                         targetThread.join();
                     } catch (Exception e) {
                         logger.error("加入线程阻塞失败", e);
                     } finally {
                         try {
                             returnResource(jedis);
+                            logger.info("归还redis链接成功, " + targetThread.getName());
                         } catch (Exception e) {
                             logger.error("归还redis连接失败", e);
                         }
@@ -157,12 +160,16 @@ public class RedisCacheService implements CacheServiceApi, InitializingBean {
         jedisPoolConfig.setBlockWhenExhausted(true);
         // 测试实例是否可用
         jedisPoolConfig.setTestOnBorrow(true);
-        jedisPoolConfig.setTestOnCreate(true);
-        jedisPoolConfig.setTestOnReturn(true);
+        jedisPoolConfig.setTestOnCreate(false);
+        jedisPoolConfig.setTestOnReturn(false);
         // 扫描空闲实例是否有效，如果验证失败则销毁，setTimeBetweenEvictionRunsMillis必须大于0才有效
         jedisPoolConfig.setTestWhileIdle(true);
         // 扫描空闲实例是否有效的时间间隔，毫秒
         jedisPoolConfig.setTimeBetweenEvictionRunsMillis(120 * 1000);
+        // 每次扫描空闲对象的次数
+        jedisPoolConfig.setNumTestsPerEvictionRun(10);
+        // 最小空闲对象保留时间
+        jedisPoolConfig.setMinEvictableIdleTimeMillis(60 * 1000);
         jedisPool = new JedisPool(jedisPoolConfig, host, port);
     }
 }
