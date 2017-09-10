@@ -83,7 +83,7 @@ function doLogin(){
 	var now = new Date();
 	jsencrypt = new JSEncrypt();
 	jsencrypt.setPublicKey($("#pubKey").val());
-	password = jsencrypt.encrypt((now.valueOf() - (now.getTimezoneOffset() * 60 * 1000)) +  "," + password);
+	password = jsencrypt.encrypt((now.valueOf() + (now.getTimezoneOffset() * 60 * 1000)) +  "," + password);
 	if("false" == password){
 		alert("加密失败")
 		return;
