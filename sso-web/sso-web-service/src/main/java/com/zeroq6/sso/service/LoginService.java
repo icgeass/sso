@@ -54,8 +54,8 @@ public class LoginService {
         try {
             String decrypt = rsaCrypt.decryptFromBase64String(password);
             String [] arr = decrypt.split("\\s*,\\s*", 2);
-            Date now = new Date();
-            Date date = new Date(Long.valueOf(arr[0]) + now.getTimezoneOffset() * 60 * 1000);
+            Date now = new Date(System.currentTimeMillis() + new Date().getTimezoneOffset() * 60 * 1000);
+            Date date = new Date(Long.valueOf(arr[0]));
             // 1. 客户端产生的加密串expireSeconds内有效
             if(now.compareTo(DateUtils.addSeconds(date, ssoServiceLoginExpireInSeconds)) > 0){
                 logger.error("非法请求" + LOGIN_CODE_FAILED_ILLEGAL_TIME + ", " + SsoUtils.getClientIp(request));
