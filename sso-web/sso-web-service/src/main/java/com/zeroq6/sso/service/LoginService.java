@@ -54,10 +54,10 @@ public class LoginService {
         try {
             String decrypt = rsaCrypt.decryptFromBase64String(password);
             String [] arr = decrypt.split("\\s*,\\s*", 2);
-            Date now = new Date(System.currentTimeMillis() + new Date().getTimezoneOffset() * 60 * 1000);
-            Date date = new Date(Long.valueOf(arr[0]));
+            Date serverTime = new Date();
+            Date clientTime = new Date(Long.valueOf(arr[0]));
             // 1. 客户端产生的加密串expireSeconds内有效
-            if(now.compareTo(DateUtils.addSeconds(date, ssoServiceLoginExpireInSeconds)) > 0){
+            if(serverTime.compareTo(DateUtils.addSeconds(clientTime, ssoServiceLoginExpireInSeconds)) > 0){
                 logger.error("非法请求" + LOGIN_CODE_FAILED_ILLEGAL_TIME + ", " + SsoUtils.getClientIp(request));
                 return new BaseResponseExtend<String>(false, LOGIN_CODE_FAILED_ILLEGAL_TIME, "非法请求", null);
             }
@@ -76,7 +76,7 @@ public class LoginService {
                 LoginContext context = new LoginContext();
                 context.setLoginIp(ip);
                 context.setUsername(username);
-                context.setLoginTime(now);
+                context.setLoginTime(serverTime);
                 String cookieValue = LoginContext.encryptContext(context,ssoConfigResponseDomain);
                 context = LoginContext.decryptContext(cookieValue, ssoConfigResponseDomain, false);
                 bl = loginCacheService.setTicket(username, ssoConfigResponseDomain, context.getTicket());
