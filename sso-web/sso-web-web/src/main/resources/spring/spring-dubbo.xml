@@ -16,9 +16,9 @@
     <dubbo:application name="sso_provider"  />
 
     <!-- 用dubbo协议在20880端口暴露服务 -->
-    <dubbo:protocol threads="3" threadpool="fixed" name="dubbo" port="20880" />
+    <dubbo:protocol threads="10" threadpool="fixed" name="dubbo" port="20880" />
 
-    <dubbo:provider threads="3" threadpool="fixed"/>
+    <dubbo:provider threads="10" threadpool="fixed"/>
 
     <!-- 声明需要暴露的服务接口 version是服务的版本号dubbo只找对应版本号的服务提供者进行调用 timeout 超时时间 超过时间过报错-->
     <dubbo:service interface="com.zeroq6.sso.web.client.api.SsoServiceApi" ref="ssoServiceApi" version="1.0" timeout="5000"/>

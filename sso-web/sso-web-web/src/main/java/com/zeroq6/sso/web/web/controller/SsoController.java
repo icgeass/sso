@@ -80,6 +80,7 @@ public class SsoController {
             result = doLogin(username, password, null, request, response, view);
         } catch (Exception e) {
             logger.error("访问登录失败", e);
+            result = toLoginPage(request, response, view, e.getMessage());
         }
         return result;
     }
@@ -92,6 +93,7 @@ public class SsoController {
             result = doLogout(null, request, response, view);
         } catch (Exception e) {
             logger.error("登出失败", e);
+            result = toLoginPage(request, response, view, e.getMessage());
         }
         return result;
     }
@@ -104,6 +106,7 @@ public class SsoController {
             result = doLogin(username, password, groupId, request, response, view);
         } catch (Exception e) {
             logger.error("访问登录失败", e);
+            result = toLoginPage(request, response, view, e.getMessage());
         }
         return result;
     }
@@ -115,6 +118,7 @@ public class SsoController {
             result = doLogout(groupId, request, response, view);
         } catch (Exception e) {
             logger.error("登出失败", e);
+            result = toLoginPage(request, response, view, e.getMessage());
         }
         return result;
     }
