@@ -56,13 +56,16 @@ public class SsoController {
     private LoginCacheService loginCacheService;
 
     @Autowired
-    private SsoConfigServiceApi ssoConfigServiceImpl;
+    private SsoConfigServiceApi ssoConfigServiceApi;
 
     @Autowired
     private CounterService counterService;
 
     @Autowired
     private RsaCrypt rsaCrypt;
+
+    @Value("${sso.loginUrl}")
+    private String loginUrl;
 
     @Value("${counter.type.login.ip}")
     private String counterTypeLoginIp;
@@ -77,7 +80,7 @@ public class SsoController {
     public String login(String username, String password, HttpServletRequest request, HttpServletResponse response, Model view) throws Exception {
         String result = null;
         try {
-            result = doLogin(username, password, null, request, response, view);
+            result = doLogin(username, password, SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID, request, response, view);
         } catch (Exception e) {
             logger.error("访问登录失败", e);
             result = toLoginPage(request, response, view, e.getMessage());
@@ -90,7 +93,7 @@ public class SsoController {
     public String logout(HttpServletRequest request, HttpServletResponse response, Model view) throws Exception {
         String result = null;
         try {
-            result = doLogout(null, request, response, view);
+            result = doLogout(SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID, request, response, view);
         } catch (Exception e) {
             logger.error("登出失败", e);
             result = toLoginPage(request, response, view, e.getMessage());
@@ -124,9 +127,12 @@ public class SsoController {
     }
 
     private String doLogin(String username, String password, String groupId, HttpServletRequest request, HttpServletResponse response, Model view) throws Exception {
+        if(!ssoConfigServiceApi.contains(groupId)){
+            return "redirect:" + loginUrl;
+        }
         view.addAttribute("publicKey", rsaCrypt.getPublicKeyBase64());
         // 拿配置
-        SsoConfigResponseDomain ssoConfigResponseDomain = ssoConfigServiceImpl.get(groupId);
+        SsoConfigResponseDomain ssoConfigResponseDomain = ssoConfigServiceApi.get(groupId);
         // 如果ticket有效的，则说明跨域的登录验证或非法请求，重定向到来源页面并将ticket值加密重定向传给来源系统
         if (null != checkTicket(request, ssoConfigResponseDomain)) {
             String cookieValue = CookieUtils.get(request, ssoConfigResponseDomain.getCookieName());
@@ -181,8 +187,11 @@ public class SsoController {
     }
 
     private String doLogout(String groupId, HttpServletRequest request, HttpServletResponse response, Model view) throws Exception {
+        if(!ssoConfigServiceApi.contains(groupId)){
+            return "redirect:" + loginUrl;
+        }
         view.addAttribute("publicKey", rsaCrypt.getPublicKeyBase64());
-        SsoConfigResponseDomain ssoConfigResponseDomain = ssoConfigServiceImpl.get(groupId);
+        SsoConfigResponseDomain ssoConfigResponseDomain = ssoConfigServiceApi.get(groupId);
         LoginContext context = checkTicket(request, ssoConfigResponseDomain);
         if (null != context) {
             loginService.logout(context.getUsername(), ssoConfigResponseDomain);

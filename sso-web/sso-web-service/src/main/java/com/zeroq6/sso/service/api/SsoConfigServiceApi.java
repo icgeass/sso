@@ -14,4 +14,6 @@ public interface SsoConfigServiceApi {
 
 
     void remove(String groupId, SsoConfigResponseDomain ssoConfigResponseDomain);
+
+    boolean contains(String groupId);
 }

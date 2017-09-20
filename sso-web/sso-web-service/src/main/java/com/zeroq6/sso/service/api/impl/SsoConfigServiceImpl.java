@@ -104,6 +104,15 @@ public class SsoConfigServiceImpl implements SsoConfigServiceApi, InitializingBe
     }
 
     @Override
+    public boolean contains(String groupId) {
+        try {
+            return SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID.equals(groupId) || ssoConfigResponseDomainMap.containsKey(groupId) || StringUtils.isNotBlank(cacheServiceApi.get(getCacheKey(groupId)));
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void afterPropertiesSet() throws Exception {
         ssoConfigResponseDomainMap.put(getCacheKey(SsoUtils.getGroupId(SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID)), MyTypeUtils.transfer(ssoConfigResponseDomain, new TypeReference<SsoConfigResponseDomain>(){}));
     }

@@ -10,7 +10,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
     <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
         <property name="minIdle" value="${redis.minIdle}"/>
-        <property name="maxIdle" value="${redis.minIdle}"/>
+        <property name="maxIdle" value="${redis.maxIdle}"/>
         <property name="maxTotal" value="${redis.maxTotal}"/>
         <property name="maxWaitMillis" value="${redis.maxWaitMillis}"/>
         <!--无可用连接则等待-->
