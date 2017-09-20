@@ -5,11 +5,34 @@
 http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
     <bean id="cacheServiceApi" class="com.zeroq6.common.cache.RedisCacheService" destroy-method="destroy">
-        <property name="host" value="${redis.host}"/>
-        <property name="port" value="${redis.port}"/>
+        <property name="jedisPool" ref="jedisPool"/>
+    </bean>
+
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
         <property name="minIdle" value="${redis.minIdle}"/>
-        <property name="maxIdle" value="${redis.maxIdle}"/>
+        <property name="maxIdle" value="${redis.minIdle}"/>
         <property name="maxTotal" value="${redis.maxTotal}"/>
         <property name="maxWaitMillis" value="${redis.maxWaitMillis}"/>
+        <!--无可用连接则等待-->
+        <property name="blockWhenExhausted" value="true"/>
+        <!--验证连接资源是否可用-->
+        <property name="testOnBorrow" value="true"></property>
+        <property name="testOnReturn" value="true"></property>
+        <property name="testOnCreate" value="true"></property>
+        <!--是否扫描空闲连接，如果验证失败则销毁，timeBetweenEvictionRunsMillis必须大于0才有效-->
+        <property name="testWhileIdle" value="true"/>
+        <!--idle object evictor扫描空闲连接间隔-->
+        <property name="timeBetweenEvictionRunsMillis" value="30000"/>
+        <!--idle object evitor每次扫描的最多的对象数-->
+        <property name="numTestsPerEvictionRun" value="3"/>
+        <!--当连接被标记为空闲状态后最少保留时间-->
+        <property name="minEvictableIdleTimeMillis" value="60000"/>
     </bean>
+
+    <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
+        <constructor-arg index="0" ref="jedisPoolConfig" />
+        <constructor-arg index="1" value="${redis.host}" type="java.lang.String"/>
+        <constructor-arg index="2" value="${redis.port}" type="int"/>
+    </bean>
+
 </beans>
