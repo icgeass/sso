@@ -35,8 +35,10 @@
             <properties>
                 <env>develop</env>
                 <!--sso-->
-                <profile.sso.protocol>https</profile.sso.protocol>
+                <profile.sso.protocol>http</profile.sso.protocol>
                 <profile.sso.domain>sso.6zeroq.com</profile.sso.domain>
+                <!--这个端口不一定是监听端口，比如nginx作内部转发时，是对外监听的端口，如果是默认端口则不作处理-->
+                <profile.sso.port>9080</profile.sso.port>
                 <!--http://blog.i5a6.com/1601.html，tomcat 8.5 cookie不能以'.'开头-->
                 <profile.sso.primaryDomain>6zeroq.com</profile.sso.primaryDomain>
             </properties>
@@ -48,6 +50,13 @@
             </activation>
             <properties>
                 <env>test</env>
+                <!--sso-->
+                <profile.sso.protocol>http</profile.sso.protocol>
+                <profile.sso.domain>sso.6zeroq.com</profile.sso.domain>
+                <!--这个端口不一定是监听端口，比如nginx作内部转发时，是对外监听的端口，如果是默认端口则不作处理-->
+                <profile.sso.port>9080</profile.sso.port>
+                <!--http://blog.i5a6.com/1601.html，tomcat 8.5 cookie不能以'.'开头-->
+                <profile.sso.primaryDomain>6zeroq.com</profile.sso.primaryDomain>
             </properties>
         </profile>
         <profile>
@@ -57,6 +66,13 @@
             </activation>
             <properties>
                 <env>production</env>
+                <!--sso-->
+                <profile.sso.protocol>http</profile.sso.protocol>
+                <profile.sso.domain>sso.6zeroq.com</profile.sso.domain>
+                <!--这个端口不一定是监听端口，比如nginx作内部转发时，是对外监听的端口，如果是默认端口则不作处理-->
+                <profile.sso.port>9080</profile.sso.port>
+                <!--http://blog.i5a6.com/1601.html，tomcat 8.5 cookie不能以'.'开头-->
+                <profile.sso.primaryDomain>6zeroq.com</profile.sso.primaryDomain>
             </properties>
         </profile>
     </profiles>

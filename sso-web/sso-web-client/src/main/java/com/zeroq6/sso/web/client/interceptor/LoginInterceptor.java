@@ -23,6 +23,10 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -148,7 +152,7 @@ public class LoginInterceptor implements HandlerInterceptor, InitializingBean {
             return false;
         }
         String ip = SsoUtils.getClientIp(request);
-        if ((null == ip) || (!"127.0.0.1".equals(ip) && !ip.equals(context.getLoginIp()))) {
+        if ((null == ip) || (!isLocalAddress(ip) && !isLocalAddress(context.getLoginIp()) && !ip.equals(context.getLoginIp()))) {
             logger.error("非法请求, 登录ip: " + context.getLoginIp() + ", 来源ip: " + ip);
             logout(request, response, false, false);
             return false;
@@ -315,6 +319,26 @@ public class LoginInterceptor implements HandlerInterceptor, InitializingBean {
 
     public static void logout(HttpServletRequest request, HttpServletResponse response) throws Exception {
         logout(request, response, true, true);
+    }
+
+
+    /**
+     * https://stackoverflow.com/questions/2406341/how-to-check-if-an-ip-address-is-the-local-host-on-a-multi-homed-system
+     * @param ip
+     * @return
+     */
+    public static boolean isLocalAddress(String ip) throws UnknownHostException {
+        InetAddress addr = InetAddress.getByName(ip);
+        // Check if the address is a valid special local or loop back
+        if (addr.isAnyLocalAddress() || addr.isLoopbackAddress())
+            return true;
+
+        // Check if the address is defined on any interface
+        try {
+            return NetworkInterface.getByInetAddress(addr) != null;
+        } catch (SocketException e) {
+            return false;
+        }
     }
 
 }

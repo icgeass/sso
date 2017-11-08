@@ -263,7 +263,8 @@ public class SsoController {
                             throw new RuntimeException("链接被篡改, " + SsoUtils.getClientIp(request));
                         }
                         redirectUrl = !redirectUrl.toLowerCase().startsWith("http") ? "http://" + redirectUrl : redirectUrl;
-                        if (!UrlValidator.getInstance().isValid(redirectUrl)) {
+                        UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS);
+                        if (!urlValidator.isValid(redirectUrl)) {
                             redirectUrl = ssoConfigResponseDomain.getDefaultRedirectUrl();
                         } else {
                             if(null != ticket){

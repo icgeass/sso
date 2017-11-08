@@ -36,6 +36,15 @@ public class SsoConfigServiceImpl implements SsoConfigServiceApi, InitializingBe
     @Value("${sso.service.group.config.cacheKeyPrefix}")
     private String ssoServiceGroupConfigCacheKeyPrefix;
 
+    @Value("${sso.port}")
+    private String port;
+
+    @Value("${sso.protocol}")
+    private String protocol;
+
+    @Value("${sso.domain}")
+    private String domain;
+
     // 一个groupId，对应的sso配置
     private final Map<String, SsoConfigResponseDomain> ssoConfigResponseDomainMap = new ConcurrentHashMap<String, SsoConfigResponseDomain>();
 
@@ -52,14 +61,14 @@ public class SsoConfigServiceImpl implements SsoConfigServiceApi, InitializingBe
         groupId = SsoUtils.getGroupId(groupId);
         String cacheKey = getCacheKey(groupId);
         SsoConfigResponseDomain ssoConfigResponseDomain = ssoConfigResponseDomainMap.get(cacheKey);
-        if(null != ssoConfigResponseDomain){
+        if (null != ssoConfigResponseDomain) {
             return ssoConfigResponseDomain;
         }
         try {
             String value = cacheServiceApi.get(cacheKey);
-            if(StringUtils.isNotBlank(value)){
+            if (StringUtils.isNotBlank(value)) {
                 ssoConfigResponseDomain = JSON.parseObject(value, SsoConfigResponseDomain.class);
-            }else{
+            } else {
                 ssoConfigResponseDomain = ssoConfigResponseDomainMap.get(getCacheKey(SsoUtils.getGroupId(SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID)));
             }
             ssoConfigResponseDomainMap.put(cacheKey, ssoConfigResponseDomain); // 放入本地缓存
@@ -72,7 +81,7 @@ public class SsoConfigServiceImpl implements SsoConfigServiceApi, InitializingBe
     @Override
     public void set(String groupId, SsoConfigResponseDomain ssoConfigResponseDomain) {
         groupId = SsoUtils.getGroupId(groupId);
-        if(SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID.equals(groupId)){
+        if (SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID.equals(groupId)) {
             return;
         }
         if (ssoConfigResponseDomainMap.size() >= ssoServiceGroupConfigMaxGroupIdCount) {
@@ -91,7 +100,7 @@ public class SsoConfigServiceImpl implements SsoConfigServiceApi, InitializingBe
     @Override
     public void remove(String groupId, SsoConfigResponseDomain ssoConfigResponseDomain) {
         groupId = SsoUtils.getGroupId(groupId);
-        if(SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID.equals(groupId)){
+        if (SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID.equals(groupId)) {
             return;
         }
         String cacheKey = getCacheKey(groupId);
@@ -107,17 +116,22 @@ public class SsoConfigServiceImpl implements SsoConfigServiceApi, InitializingBe
     public boolean contains(String groupId) {
         try {
             return SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID.equals(groupId) || ssoConfigResponseDomainMap.containsKey(groupId) || StringUtils.isNotBlank(cacheServiceApi.get(getCacheKey(groupId)));
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        ssoConfigResponseDomainMap.put(getCacheKey(SsoUtils.getGroupId(SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID)), MyTypeUtils.transfer(ssoConfigResponseDomain, new TypeReference<SsoConfigResponseDomain>(){}));
+        if (("https".equals(protocol) && !"443".equals(port)) || ("http".equals(protocol) && !"80".equals(port))) {
+            ssoConfigResponseDomain.setLoginUrl(protocol + "://" + domain + ":" + port + "/sso/login");
+            ssoConfigResponseDomain.setLogoutUrl(protocol + "://" + domain + ":" + port + "/sso/logout");
+        }
+        ssoConfigResponseDomainMap.put(getCacheKey(SsoUtils.getGroupId(SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID)), MyTypeUtils.transfer(ssoConfigResponseDomain, new TypeReference<SsoConfigResponseDomain>() {
+        }));
     }
 
-    private String getCacheKey(String groupId){
+    private String getCacheKey(String groupId) {
         return ssoServiceGroupConfigCacheKeyPrefix + SsoUtils.getGroupId(groupId);
     }
 }
