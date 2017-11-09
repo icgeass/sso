@@ -12,7 +12,6 @@ import com.zeroq6.sso.web.client.domain.BaseResponse;
 import com.zeroq6.sso.web.client.domain.SsoConfigRequestDomain;
 import com.zeroq6.sso.web.client.domain.SsoConfigResponseDomain;
 import com.zeroq6.sso.web.client.utils.SsoUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,19 +138,19 @@ public class SsoServiceImpl implements SsoServiceApi {
             }
             // 拦截路径是否设置groupId均可配置，默认groupId过期时间不能在客户端配置，否则如果是单点登录域的主域，可能影响其他接入应用
             String disallowUriPrefix = ssoConfigRequestDomain.getDisallowUriPrefix();
-            if (StringUtils.isNotBlank(disallowUriPrefix)) {
+            if (null != disallowUriPrefix) {
                 re.setDisallowUriPrefix(disallowUriPrefix);
             }
             String disallowUriSuffix = ssoConfigRequestDomain.getDisallowUriSuffix();
-            if (StringUtils.isNotBlank(disallowUriSuffix)) {
+            if (null != disallowUriSuffix) {
                 re.setDisallowUriSuffix(disallowUriSuffix);
             }
             String ignoreUriPrefix = ssoConfigRequestDomain.getIgnoreUriPrefix();
-            if (StringUtils.isNotBlank(ignoreUriPrefix)) {
+            if (null != ignoreUriPrefix) {
                 re.setIgnoreUriPrefix(ignoreUriPrefix);
             }
             String ignoreUriSuffix = ssoConfigRequestDomain.getIgnoreUriSuffix();
-            if (StringUtils.isNotBlank(ignoreUriSuffix)) {
+            if (null != ignoreUriSuffix) {
                 re.setIgnoreUriSuffix(ignoreUriSuffix);
             }
             // 将groupId对应的配置存入缓存，groupId为SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID，则在初始化时放入
