@@ -18,9 +18,8 @@
         <property name="disallowUriSuffix" value="${sso.disallowUriSuffix}"/>
         <property name="returnUrlName" value="${sso.returnUrlName}"/>
         <property name="singleSignExit" value="${sso.singleSignExit}"/>
+        <!--登陆，登出url初始化后应用设置-->
         <property name="ticketName" value="${sso.ticketName}"/>
-        <property name="loginUrl" value="${sso.loginUrl}"/>
-        <property name="logoutUrl" value="${sso.logoutUrl}"/>
         <property name="defaultRedirectUrl" value="${sso.defaultRedirectUrl}"/>
         <property name="primaryDomain" value="${sso.primaryDomain}"/>
         <property name="redirectTicketExpireInSeconds" value="${sso.redirectTicketExpireInSeconds}"/>

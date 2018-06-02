@@ -69,5 +69,14 @@ public abstract class BaseDomain<T extends BaseDomain> extends BaseQuery<T> {
         return (T)this;
     }
 
+    public T put(String key, Object value) {
+        getExtendMap().put(key, value);
+        return (T)this;
+    }
+
+    public Object get(String key){
+        return getExtendMap().get(key);
+    }
+
 
 }

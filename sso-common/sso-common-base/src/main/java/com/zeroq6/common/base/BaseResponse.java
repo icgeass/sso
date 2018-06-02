@@ -8,20 +8,20 @@ import java.io.Serializable;
  */
 public class BaseResponse<T> implements Serializable{
     private static final long serialVersionUID = 1L;
-    public static final String SUCCESS = "成功";
-    public static final String FAILED = "失败";
+    public final static String MESSAGE_SUCCESS = "成功";
+    public final static String MESSAGE_FAILED = "失败";
     private boolean success;
     private String message;
     private T body;
     public BaseResponse(){}
 
     public BaseResponse(boolean success, T body) {
-        this(success, success ? SUCCESS : FAILED, body);
+        this(success, success ? MESSAGE_SUCCESS : MESSAGE_FAILED, body);
     }
 
     public BaseResponse(boolean success, String message, T body) {
         this.success = success;
-        this.message = message;
+        this.message = String.valueOf(message);
         this.body = body;
     }
 

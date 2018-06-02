@@ -64,8 +64,9 @@ public class SsoController {
     @Autowired
     private RsaCrypt rsaCrypt;
 
-    @Value("${sso.loginUrl}")
-    private String loginUrl;
+
+    @Autowired
+    private SsoConfigResponseDomain ssoConfigResponseDomain;
 
     @Value("${counter.type.login.ip}")
     private String counterTypeLoginIp;
@@ -128,7 +129,7 @@ public class SsoController {
 
     private String doLogin(String username, String password, String groupId, HttpServletRequest request, HttpServletResponse response, Model view) throws Exception {
         if(!ssoConfigServiceApi.contains(groupId)){
-            return "redirect:" + loginUrl;
+            return "redirect:" + ssoConfigResponseDomain.getLoginUrl();
         }
         view.addAttribute("publicKey", rsaCrypt.getPublicKeyBase64());
         // 拿配置
@@ -188,7 +189,7 @@ public class SsoController {
 
     private String doLogout(String groupId, HttpServletRequest request, HttpServletResponse response, Model view) throws Exception {
         if(!ssoConfigServiceApi.contains(groupId)){
-            return "redirect:" + loginUrl;
+            return "redirect:" + ssoConfigResponseDomain.getLoginUrl();
         }
         view.addAttribute("publicKey", rsaCrypt.getPublicKeyBase64());
         SsoConfigResponseDomain ssoConfigResponseDomain = ssoConfigServiceApi.get(groupId);

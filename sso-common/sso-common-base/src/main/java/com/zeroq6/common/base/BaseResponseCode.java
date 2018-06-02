@@ -38,7 +38,7 @@ public class BaseResponseCode<T> implements Serializable{
         }else if(CODE_FAILED.equals(code)){
             message = MESSAGE_FAILED;
         }
-        this.message = message;
+        this.message = String.valueOf(message);
     }
 
     public BaseResponseCode(String code, String message, T body) {
@@ -46,7 +46,7 @@ public class BaseResponseCode<T> implements Serializable{
             throw new RuntimeException("构造传入code非法, " + code);
         }
         this.code = code;
-        this.message = message;
+        this.message = String.valueOf(message);
         this.body = body;
     }
 
