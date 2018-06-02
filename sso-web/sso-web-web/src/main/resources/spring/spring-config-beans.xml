@@ -50,7 +50,7 @@
     <bean id="authenticationService" class="com.zeroq6.sso.service.api.impl.AuthenticationService">
         <property name="accountInfoMap">
             <map>
-                <entry key="admin" value="32fe2749dd55b380e127ac2663b4b8c4"/>
+                <entry key="admin" value="4978ae4138a6b4dd0e72becfb564492e"/>
             </map>
         </property>
     </bean>

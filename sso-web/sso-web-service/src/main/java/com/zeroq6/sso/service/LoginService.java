@@ -57,7 +57,7 @@ public class LoginService {
             Date serverTime = new Date();
             Date clientTime = new Date(Long.valueOf(arr[0]));
             // 1. 客户端产生的加密串expireSeconds内有效
-            if(serverTime.compareTo(DateUtils.addSeconds(clientTime, ssoServiceLoginExpireInSeconds)) > 0){
+            if(!(serverTime.compareTo(DateUtils.addSeconds(clientTime, - ssoServiceLoginExpireInSeconds)) > 0 && serverTime.compareTo(DateUtils.addSeconds(clientTime, ssoServiceLoginExpireInSeconds)) < 0)){
                 logger.error("非法请求" + LOGIN_CODE_FAILED_ILLEGAL_TIME + ", " + SsoUtils.getClientIp(request));
                 return new BaseResponseExtend<String>(false, LOGIN_CODE_FAILED_ILLEGAL_TIME, "非法请求", null);
             }

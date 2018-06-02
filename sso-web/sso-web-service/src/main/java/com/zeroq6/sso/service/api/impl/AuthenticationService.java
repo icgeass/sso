@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class AuthenticationService implements AuthenticationServiceApi {
 
-    private final static String PASSWORD_SALT = "sso.6zeroq.com_";
+    private final static String PASSWORD_SALT = "login_salt_";
 
     private Map<String, String> accountInfoMap;
 

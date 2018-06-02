@@ -77,7 +77,7 @@ public class SsoConfigServiceImpl implements SsoConfigServiceApi, InitializingBe
             if (StringUtils.isNotBlank(value)) {
                 ssoConfigResponseDomain = JSON.parseObject(value, SsoConfigResponseDomain.class);
             } else {
-                ssoConfigResponseDomain = copyDefaultSsoConfigResponse();
+                ssoConfigResponseDomain = copyOfDefaultSsoConfigResponse();
             }
             return ssoConfigResponseDomain;
         } catch (Exception e) {
@@ -133,15 +133,18 @@ public class SsoConfigServiceImpl implements SsoConfigServiceApi, InitializingBe
         if (("https".equals(protocol) && !"443".equals(port)) || ("http".equals(protocol) && !"80".equals(port))) {
             ssoConfigResponseDomain.setLoginUrl(protocol + "://" + domain + ":" + port + "/sso/login");
             ssoConfigResponseDomain.setLogoutUrl(protocol + "://" + domain + ":" + port + "/sso/logout");
+        }else{
+            ssoConfigResponseDomain.setLoginUrl(protocol + "://" + domain + "/sso/login");
+            ssoConfigResponseDomain.setLogoutUrl(protocol + "://" + domain + "/sso/logout");
         }
-        ssoConfigResponseDomainMap.put(getCacheKey(SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID), copyDefaultSsoConfigResponse());
+        ssoConfigResponseDomainMap.put(getCacheKey(SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID), copyOfDefaultSsoConfigResponse());
     }
 
     private String getCacheKey(String groupId) {
         return ssoServiceGroupConfigCacheKeyPrefix + SsoUtils.getGroupId(groupId);
     }
 
-    private SsoConfigResponseDomain copyDefaultSsoConfigResponse(){
+    private SsoConfigResponseDomain copyOfDefaultSsoConfigResponse(){
         return MyTypeUtils.transfer(ssoConfigResponseDomain, new TypeReference<SsoConfigResponseDomain>() {});
     }
 }
