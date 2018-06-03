@@ -157,7 +157,7 @@ public class LoginInterceptor implements HandlerInterceptor, InitializingBean {
             logout(request, response, false, false);
             return false;
         }
-        // 防止cookieValue被人为添加到请求头，从而cookieValue永久有效
+        // 防止cookieValue被人为添加到请求头，从而cookieValue永久有效（因为不单点退出的情况不远程验证ticket的）
         // 验证过期时间为cookie更新时间 + xxx 秒，避免因为时间差导致sso客户端验证过期，服务端验证没有过期引起的循环重定向
         Date expire = DateUtils.addSeconds(context.getCookieTime(), ssoConfigResponseDomain.getExpiredInSeconds() + 1200);
         if (new Date().compareTo(expire) > 0) {
@@ -194,7 +194,7 @@ public class LoginInterceptor implements HandlerInterceptor, InitializingBean {
                 }
             }
             //
-            // 间隔一定时间更新cookie值，但是ticket不能变
+            // 间隔一定时间更新cookie值，但是ticket不能变，否则无法远程校验ticket
             if (new Date().compareTo(DateUtils.addSeconds(context.getCookieTime(), ssoConfigResponseDomain.getExpiredInSeconds() / 2)) > 0) {
                 cookie = new Cookie(ssoConfigResponseDomain.getCookieName(), LoginContext.encryptContext(context, ssoConfigResponseDomain));
                 cookie.setDomain(SsoUtils.getCookieDomain(request));
@@ -203,7 +203,7 @@ public class LoginInterceptor implements HandlerInterceptor, InitializingBean {
                 CookieUtils.set(response, cookie);
             }
         }
-        // 验证通过，如果带有ssoConfigResponseDomain.getTicketName()参数则重定向去掉
+        // 验证通过，如果带有ssoConfigResponseDomain.getTicketName()参数则重定向去掉，为了用户友好
         // 情况1，服务端重定向；情况2，多开窗口重复登录
         if(SsoConfigResponseDomain.HTTP_METHOD_GET.equals(request.getMethod()) && StringUtils.isNotBlank(request.getParameter(ssoConfigResponseDomain.getTicketName()))){
             String queryString = SsoUtils.getQueryString(request, ssoConfigResponseDomain.getTicketName());
@@ -275,6 +275,8 @@ public class LoginInterceptor implements HandlerInterceptor, InitializingBean {
      * <p/>
      * 会将response重定向，
      * 调用后立即将当前请求return掉
+     *
+     * 只有用户主动logout会传 true true，否则false false
      *
      * @param request
      * @param response

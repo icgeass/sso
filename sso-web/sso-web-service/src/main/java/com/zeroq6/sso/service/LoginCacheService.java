@@ -119,6 +119,13 @@ public class LoginCacheService {
         return ssoServiceLoginCacheKeyPrefix + SsoUtils.getGroupId(groupId) + "_" + username;
     }
 
+
+    /**
+     * 获取登录后重定向缓存key
+     * @param key
+     * @param groupId
+     * @return
+     */
     private String getRedirectCacheKey(String key, String groupId) {
         return ssoServiceLoginCacheKeyPrefix  + "REDIRECT_" + SsoUtils.getGroupId(groupId) + "_" + key;
     }

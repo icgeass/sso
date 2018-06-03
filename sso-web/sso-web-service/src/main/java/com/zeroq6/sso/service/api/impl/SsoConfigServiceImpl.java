@@ -45,6 +45,15 @@ public class SsoConfigServiceImpl implements SsoConfigServiceApi, InitializingBe
     @Value("${sso.domain}")
     private String domain;
 
+    @Value("${sso.uri.sso}")
+    private String ssoUriSso;
+
+    @Value("${sso.uri.login}")
+    private String ssoUriLogin;
+
+    @Value("${sso.uri.logout}")
+    private String ssoUriLogout;
+
     // 一个groupId，对应的sso配置
     private final Map<String, SsoConfigResponseDomain> ssoConfigResponseDomainMap = new ConcurrentHashMap<String, SsoConfigResponseDomain>();
 
@@ -131,11 +140,11 @@ public class SsoConfigServiceImpl implements SsoConfigServiceApi, InitializingBe
     @Override
     public void afterPropertiesSet() throws Exception {
         if (("https".equals(protocol) && !"443".equals(port)) || ("http".equals(protocol) && !"80".equals(port))) {
-            ssoConfigResponseDomain.setLoginUrl(protocol + "://" + domain + ":" + port + "/sso/login");
-            ssoConfigResponseDomain.setLogoutUrl(protocol + "://" + domain + ":" + port + "/sso/logout");
+            ssoConfigResponseDomain.setLoginUrl(protocol + "://" + domain + ":" + port + "/" + ssoUriSso + "/" + ssoUriLogin);
+            ssoConfigResponseDomain.setLogoutUrl(protocol + "://" + domain + ":" + port + "/" + ssoUriSso + "/" + ssoUriLogout);
         }else{
-            ssoConfigResponseDomain.setLoginUrl(protocol + "://" + domain + "/sso/login");
-            ssoConfigResponseDomain.setLogoutUrl(protocol + "://" + domain + "/sso/logout");
+            ssoConfigResponseDomain.setLoginUrl(protocol + "://" + domain + "/" + ssoUriSso + "/" + ssoUriLogin);
+            ssoConfigResponseDomain.setLogoutUrl(protocol + "://" + domain + "/" + ssoUriSso + "/" + ssoUriLogout);
         }
         ssoConfigResponseDomainMap.put(getCacheKey(SsoConfigResponseDomain.DEFAULT_SSO_GROUP_ID), copyOfDefaultSsoConfigResponse());
     }

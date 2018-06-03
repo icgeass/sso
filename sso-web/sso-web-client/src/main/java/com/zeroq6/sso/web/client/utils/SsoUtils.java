@@ -30,6 +30,7 @@ public class SsoUtils {
     // 切记，$_SERVER['REMOTE_ADDR']  是由 nginx 传递给 php 的参数，就代表了与当前 nginx 直接通信的客户端的 IP （是不能伪造的）。
     // REMOTE_ADDR放在最前面
     private final static String[] HEADERS_IP_TO_TRY = {
+            "X-Real-IP",
             "REMOTE_ADDR",
             "X-Forwarded-For",
             "Proxy-Client-IP",

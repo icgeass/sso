@@ -30,8 +30,9 @@ public class SsoServiceImpl implements SsoServiceApi {
     @Autowired
     private SsoConfigServiceApi ssoConfigServiceImpl;
 
-    @Value("${sso.service.login.controller.prefix}")
-    private String ssoServiceLoginControllerPrefix;
+
+    @Value("${sso.uri.sso}")
+    private String ssoUriSso;
 
     @Value("${sso.service.cookie.maxExpiredInSeconds}")
     private int cookieMaxExpiredInSeconds;
@@ -131,8 +132,8 @@ public class SsoServiceImpl implements SsoServiceApi {
                 }
                 // 这几个属性只能设置一次, 否则重叠
                 if(!re.getCookieName().contains(ssoConfigRequestDomain.getGroupId() + ".")){
-                    re.setLoginUrl(re.getLoginUrl().replaceFirst(ssoServiceLoginControllerPrefix, ssoServiceLoginControllerPrefix + ssoConfigRequestDomain.getGroupId() + "/"));
-                    re.setLogoutUrl(re.getLogoutUrl().replaceFirst(ssoServiceLoginControllerPrefix, ssoServiceLoginControllerPrefix + ssoConfigRequestDomain.getGroupId() + "/"));
+                    re.setLoginUrl(re.getLoginUrl().replaceFirst("/" + ssoUriSso + "/", "/" + ssoUriSso + "/" + ssoConfigRequestDomain.getGroupId() + "/"));
+                    re.setLogoutUrl(re.getLogoutUrl().replaceFirst("/" + ssoUriSso + "/", "/" + ssoUriSso + "/" + ssoConfigRequestDomain.getGroupId() + "/"));
                     re.setCookieName(ssoConfigRequestDomain.getGroupId() + "." + re.getCookieName());
                 }
             }

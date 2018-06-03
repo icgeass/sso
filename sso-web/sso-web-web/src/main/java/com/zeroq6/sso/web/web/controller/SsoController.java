@@ -14,6 +14,7 @@ import com.zeroq6.sso.service.api.SsoConfigServiceApi;
 import com.zeroq6.sso.web.client.context.LoginContext;
 import com.zeroq6.sso.web.client.domain.BaseResponseExtend;
 import com.zeroq6.sso.web.client.domain.SsoConfigResponseDomain;
+import com.zeroq6.sso.web.client.interceptor.LoginInterceptor;
 import com.zeroq6.sso.web.client.utils.CookieUtils;
 import com.zeroq6.sso.web.client.utils.SsoUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,14 +36,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
 import java.util.*;
 
-/**
- * todo 后续可以考虑加入登录密码+时间的RSA加密 ---不是sso内容，目前不加 --- 完成
- * todo cookie的readOnly， -- servlet 2.5不支持，3.1兼容性不好，目前不加 -- 完成
- * todo 登录用户，ip的错误次数限制，前台的优化等  -- 完成
- * todo 添加是否验证ip 开关 -- 一律加入
- * todo 字体 -- 不需要
- * todo 服务户端多机部署 -- 依赖数据库，实际应用时才加，不加 -- 使用缓存，完成
- */
 @Controller
 @RequestMapping("/sso")
 public class SsoController {
@@ -64,7 +57,6 @@ public class SsoController {
     @Autowired
     private RsaCrypt rsaCrypt;
 
-
     @Autowired
     private SsoConfigResponseDomain ssoConfigResponseDomain;
 
@@ -74,8 +66,7 @@ public class SsoController {
     @Value("${counter.type.login.username}")
     private String counterTypeLoginUsername;
 
-    @Value("${sso.service.login.controller.prefix}")
-    private String ssoServiceLoginControllerPrefix;
+
 
     @RequestMapping(value = "/login", method = {RequestMethod.GET, RequestMethod.POST})
     public String login(String username, String password, HttpServletRequest request, HttpServletResponse response, Model view) throws Exception {
@@ -144,7 +135,7 @@ public class SsoController {
         // GET访问登录页面
         if (SsoConfigResponseDomain.HTTP_METHOD_GET.equals(request.getMethod())) {
             // 删除验证失败的cookie，重新登录
-            CookieUtils.delete(request, response, ssoConfigResponseDomain.getCookieName(), ssoConfigResponseDomain.getPrimaryDomain(), ssoServiceLoginControllerPrefix + ssoConfigResponseDomain.getGroupId());
+            CookieUtils.delete(request, response, ssoConfigResponseDomain.getCookieName(), ssoConfigResponseDomain.getPrimaryDomain(), "/");
             // POST提交登录
         } else if (SsoConfigResponseDomain.HTTP_METHOD_POST.equals(request.getMethod())) {
             // 登录错误次数验证
@@ -155,7 +146,7 @@ public class SsoController {
             for(Counter counter : counterList){
                 if(counter.isLock()){
                     message = counter.getMessage();
-                    CookieUtils.delete(request, response, ssoConfigResponseDomain.getCookieName(), ssoConfigResponseDomain.getPrimaryDomain(), ssoServiceLoginControllerPrefix + ssoConfigResponseDomain.getGroupId());
+                    CookieUtils.delete(request, response, ssoConfigResponseDomain.getCookieName(), ssoConfigResponseDomain.getPrimaryDomain(), "/");
                     return toLoginPage(request, response, view, message);
                 }
             }
@@ -219,7 +210,7 @@ public class SsoController {
             return null;
         }
         String ip = SsoUtils.getClientIp(request);
-        if ((null == ip) || (!"127.0.0.1".equals(ip) && !ip.equals(context.getLoginIp()))) {
+        if ((null == ip) || (!LoginInterceptor.isLocalAddress(ip) && !LoginInterceptor.isLocalAddress(context.getLoginIp()) && !ip.equals(context.getLoginIp()))) {
             logger.error("非法请求, 登录ip: " + context.getLoginIp() + ", 来源ip: " + ip);
             return null;
         }
@@ -252,7 +243,7 @@ public class SsoController {
     private void toFromPage(HttpServletRequest request, HttpServletResponse response, SsoConfigResponseDomain ssoConfigResponseDomain, String ticket) throws Exception {
         String redirectUrl = null;
         try{
-            redirectUrl = request.getQueryString(); // 这种方式不会解码编码过的ReturnUrl，getParameter会解码，并且出现乱码
+            redirectUrl = request.getQueryString();
             if (StringUtils.isNotBlank(redirectUrl)) {
                 List<String> params = Arrays.asList(redirectUrl.split("&"));
                 for (String param : params) {

@@ -25,7 +25,9 @@ public class LoginContext {
 
     private final static Logger logger = LoggerFactory.getLogger(LoginContext.class);
 
-    private final static int LOGIN_CONTEXT_CACHE_SIZE = 10000;
+    private final static int LOGIN_CONTEXT_CACHE_SIZE = 2000;
+
+    private final static int GROUP_ID_AES_CRYPT_SIZE = 2000;
 
     /**
      * ticket正则
@@ -35,12 +37,12 @@ public class LoginContext {
 
     /**
      * aes解密对象缓存，每次new比较费时
-     *
-     * 客户端引用只会有一个
-     * 服务端可能有多个，不过有最大个数限制
      */
-    private final static Map<String, AesCrypt> GROUP_ID_AES_CRYPT_CACHE = new ConcurrentHashMap<String, AesCrypt>();
-
+    private final static Map<String, AesCrypt> GROUP_ID_AES_CRYPT_CACHE = Collections.synchronizedMap(new LinkedHashMap(LOGIN_CONTEXT_CACHE_SIZE, 0.75F, true) {
+        protected boolean removeEldestEntry(Map.Entry eldest) {
+            return this.size() > GROUP_ID_AES_CRYPT_SIZE;
+        }
+    });
 
     private final static Map<String, LoginContext> CIPHER_LOGIN_CONTEXT_CACHE = Collections.synchronizedMap(new LinkedHashMap(LOGIN_CONTEXT_CACHE_SIZE, 0.75F, true) {
         protected boolean removeEldestEntry(Map.Entry eldest) {
@@ -104,6 +106,14 @@ public class LoginContext {
      * 用cookie解析context
      * <p/>
      * 输入都是16进制字符串
+     *
+     * @param cipher
+     * @param ssoConfigResponseDomain
+     * @param rawTicket  true 代表cookieValue，包含cookie时间，登录时间，ip，用户名，和ticket（每次用登录时间，ip，用户名加密计算出来写入ticket属性）
+     *                   false  代表ticket，这个是缓存中value，key，包含登录时间，ip，用户名，目前只有服务端验证用到
+     *
+     * @return
+     * @throws Exception
      */
     public static LoginContext decryptContext(String cipher, SsoConfigResponseDomain ssoConfigResponseDomain, boolean rawTicket) throws Exception {
         try {
@@ -139,6 +149,14 @@ public class LoginContext {
         }
     }
 
+    /**
+     * 加密返回cookieValue
+     *
+     * @param context
+     * @param ssoConfigResponseDomain
+     * @return
+     * @throws Exception
+     */
     public static String encryptContext(LoginContext context, SsoConfigResponseDomain ssoConfigResponseDomain) throws Exception {
         try {
             // 时间从存秒数，压缩cookie大小
@@ -158,13 +176,33 @@ public class LoginContext {
         }
     }
 
+    /**
+     * 将明文转为byte数组
+     * 用AES加密该byte数组，得到加密后的byte数组
+     * 将加密后的byte数组转为16进制表示
+     * @param plain
+     * @param ssoConfigResponseDomain
+     * @return
+     * @throws Exception
+     */
     public static String encryptToHexLowercase(String plain, SsoConfigResponseDomain ssoConfigResponseDomain) throws Exception {
         return Hex.encodeHexString(getAesCrypt(ssoConfigResponseDomain).encryptByteArray(plain.getBytes(ssoConfigResponseDomain.getCharset())));
     }
 
+
+    /**
+     * 将16进制的密文转为byte数组
+     * 用AES解密该byte数组为解密后的byte数组
+     * 将解密后的byte数组还原为明文
+     * @param cipher
+     * @param ssoConfigResponseDomain
+     * @return
+     * @throws Exception
+     */
     public static String decryptFromHexLowercase(String cipher, SsoConfigResponseDomain ssoConfigResponseDomain) throws Exception {
         return new String(getAesCrypt(ssoConfigResponseDomain).decryptByteArray(Hex.decodeHex(cipher.toCharArray())), ssoConfigResponseDomain.getCharset());
     }
+
 
     public static String encrypt(String plain, SsoConfigResponseDomain ssoConfigResponseDomain) throws Exception {
         try {
@@ -174,6 +212,7 @@ public class LoginContext {
             throw new RuntimeException(e);
         }
     }
+
 
     public static String decrypt(String cipher, SsoConfigResponseDomain ssoConfigResponseDomain) throws Exception {
         try {
