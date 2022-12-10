@@ -16,7 +16,7 @@
         <!--https://maven.apache.org/general.html#encoding-warning-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!---->
-        <spring.version>4.3.7.RELEASE</spring.version>
+        <spring.version>6.0.0</spring.version>
         <project.domain>login.6zeroq.com</project.domain>
         <!--日志配置-->
         <project.logger.fileName><![CDATA[/export/Logs/${project.domain}/${project.artifactId}.%d{yyyy-MM-dd}.log]]></project.logger.fileName>
